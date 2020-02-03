@@ -1,12 +1,22 @@
-﻿using System;
+﻿using SIS.HTTP;
+using SulsApp.Controllers;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SulsApp
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var db = new ApplicationDbContext();
+            db.Database.EnsureCreated();
+
+            var routeTable = new List<Route>();
+            routeTable.Add(new Route(HttpMethodType.Get, "/", new HomeController().Index));
+
+            var httpServer = new HttpServer(80, routeTable);
+            await httpServer.StartAsync();
         }
     }
 }

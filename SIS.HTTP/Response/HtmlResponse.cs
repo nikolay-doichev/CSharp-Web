@@ -6,8 +6,7 @@ namespace SIS.HTTP.Response
 {
     public class HtmlResponse : HttpResponse
     {
-        public HtmlResponse(string html) : 
-            base()
+        public HtmlResponse(string html)
         {
             this.StatusCode = HttpResponseCode.Ok;
             byte[] byteData = Encoding.UTF8.GetBytes(html);

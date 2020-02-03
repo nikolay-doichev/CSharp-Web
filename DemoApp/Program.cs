@@ -3,6 +3,7 @@ using SIS.HTTP.Response;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -32,12 +33,41 @@ namespace DemoApp
         public static HttpResponse Index(HttpRequest request)
         {
             var username = request.SessionData.ContainsKey("Username") ? request.SessionData["Username"] : "Anonymous";
-            return new HtmlResponse($"<form action='/Tweets/Create' method='post'><input name='creator' /> <br /><textarea name='tweetName'></textarea><br /><input type='submit' /></form>");
+
+
+            var db = new ApplicationDbContext();
+            var tweets = db.Tweets.Select(x => new
+            {
+                x.CreateOn,
+                x.Creator,
+                x.Content
+            }).ToList();
+
+            StringBuilder html = new StringBuilder();
+            html.Append("<table><tr>Date<th></th><th>Creator</th><th>Content</th></tr>");
+            foreach (var tweet in tweets)
+            {
+                html.Append($"<tr><td>{tweet.CreateOn}</td><td>{tweet.Creator}</td><td>{tweet.Content}</td></tr>");
+            }
+            html.Append("</table>");
+            html.Append($"<form action='/Tweets/Create' method='post'><input name='creator' /> <br /><textarea name='tweetName'></textarea><br /><input type='submit' /></form>");
+
+            return new HtmlResponse(html.ToString());
         }
 
         public static HttpResponse CreateTweet(HttpRequest request)
         {
-            return new HtmlResponse("");
+            var db = new ApplicationDbContext();
+            db.Tweets.Add(new Tweet
+            {
+                CreateOn = DateTime.UtcNow,
+                Creator = request.FormData["creator"],
+                Content = request.FormData["tweetName"]
+            });
+
+            db.SaveChanges();
+
+            return new RedirectResponse("/");
         }
     }
 }

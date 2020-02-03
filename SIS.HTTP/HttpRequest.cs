@@ -75,9 +75,8 @@ namespace SIS.HTTP
                             var cookieParts = cookieAsString.Split(new char[] { '=' }, 2);
                             if (cookieParts.Length == 2)
                             {
-                                this.Cookies.Add(new Cookie(
-                                    HttpUtility.UrlDecode(cookieParts[0]), 
-                                    HttpUtility.UrlDecode(cookieParts[1])));
+                                this.Cookies.Add(new Cookie(cookieParts[0], 
+                                                            cookieParts[1]));
                             }
                         }
                     }
@@ -89,11 +88,13 @@ namespace SIS.HTTP
 
                 this.Body = bodyBuilder.ToString().TrimEnd('\r', '\n');
                 this.FormData = new Dictionary<string, string>();
-                var bodyParts = this.Body.Split('&');
+                var bodyParts = this.Body.Split(new char[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (var bodyPart in bodyParts)
                 {
                     var parameterParts = bodyPart.Split(new char[] { '=' }, 2);
-                    this.FormData.Add(parameterParts[0], parameterParts[1]);
+                    this.FormData.Add(
+                        HttpUtility.UrlDecode(parameterParts[0]), 
+                        HttpUtility.UrlDecode(parameterParts[1]));
                 }
             }
         }
