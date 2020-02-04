@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SIS.MvcFramework", "SIS.Mvc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoApp", "DemoApp\DemoApp.csproj", "{564008AE-2ED5-4101-BC88-892E07E132D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SulsApp", "SulsApp\SulsApp.csproj", "{B42E7EC6-8672-4C11-AFE5-FD480546FA54}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SulsApp", "SulsApp\SulsApp.csproj", "{B42E7EC6-8672-4C11-AFE5-FD480546FA54}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SIS.MvcFramework.Tests", "SIS.MvcFramework.Tests\SIS.MvcFramework.Tests.csproj", "{709BDDEA-C69F-46C4-8C86-B45F91513CE1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{B42E7EC6-8672-4C11-AFE5-FD480546FA54}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B42E7EC6-8672-4C11-AFE5-FD480546FA54}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B42E7EC6-8672-4C11-AFE5-FD480546FA54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{709BDDEA-C69F-46C4-8C86-B45F91513CE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{709BDDEA-C69F-46C4-8C86-B45F91513CE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{709BDDEA-C69F-46C4-8C86-B45F91513CE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{709BDDEA-C69F-46C4-8C86-B45F91513CE1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
