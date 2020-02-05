@@ -1,7 +1,9 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
+using System.IO;
 using System.Reflection;
+using System.Text;
 
 namespace SIS.MvcFramework
 {
@@ -26,7 +28,7 @@ namespace SIS.MvcFramework
                                                      return html.ToString();
                                                 }}
                                         }}
-                                {{";
+                                }}";
             IView view = GetInstanceFromCode(code, model);
             string html = view.GetHtml(model);
             return html;
@@ -34,8 +36,8 @@ namespace SIS.MvcFramework
 
         private IView GetInstanceFromCode(string code, object model)
         {
-            var compilation =  CSharpCompilation.Create("AppViewAssembly").WithOptions
-                (new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+            var compilation =  CSharpCompilation.Create("AppViewAssembly")
+                .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
                 .AddReferences(MetadataReference.CreateFromFile(typeof(IView).Assembly.Location))
                 .AddReferences(MetadataReference.CreateFromFile(typeof(Object).Assembly.Location))
                 .AddReferences(MetadataReference.CreateFromFile(model.GetType().Assembly.Location));
@@ -44,21 +46,35 @@ namespace SIS.MvcFramework
 
             foreach (var library in libraries)
             {
-                compilation = compilation.AddReferences((
-                    MetadataReference.CreateFromFile(Assembly.Load(library).Location)));
+                compilation = compilation.AddReferences(
+                    MetadataReference.CreateFromFile(Assembly.Load(library).Location));
             }
 
             compilation = compilation.AddSyntaxTrees(SyntaxFactory.ParseSyntaxTree(code));
 
-            compilation.Emit("a.dll");
+            using var memoryStream = new MemoryStream();
+            compilation.Emit(memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
+            var assemblyByteArray = memoryStream.ToArray();
+            var assembly = Assembly.Load(assemblyByteArray);
+            var type = assembly.GetType("AppViewNamespace.AppViewCode");
+            var instance = Activator.CreateInstance(type) as IView;
 
-            return null;
+            return instance;
 
         }
 
         private string PrepareCSharpCode(string templateHtml)
         {
-            return string.Empty;
+            StringBuilder cSharpCode = new StringBuilder();
+            StringReader reader = new StringReader(templateHtml);
+            string line;
+
+            while ((line = reader.ReadLine()) != null)
+            {
+                cSharpCode.AppendLine($"html.AppendLine(@\"{line.Replace("\"", "\"\"")}\");");
+            }
+            return cSharpCode.ToString();
         }
     }
 }
