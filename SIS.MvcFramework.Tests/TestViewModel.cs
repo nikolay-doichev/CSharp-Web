@@ -6,6 +6,6 @@ namespace SIS.MvcFramework.Tests
     {
         public int Year { get; set; }
         public string Name { get; set; }
-        public IEnumerable<int> Number { get; set; }
+        public IEnumerable<int> Numbers { get; set; }
     }
 }

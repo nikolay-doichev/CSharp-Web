@@ -1,11 +1,11 @@
-﻿<h1>Hello!</h1>
-@if(DateTime.UtcNow == 2020)
+﻿﻿<h1>Hello!</h1>
+@if (DateTime.UtcNow.Year == 2020)
 {
-    @for(i = 1; i<=10; i++)
+    @for (int i = 1; i <= 10; i++)
     {
-        @if(i % 3 == 0)
+        @if (i % 3 == 0)
         {
-            <p><span>@i</span><span>@DateTime.UtcNow.Year</span></p>        
+            <p><span>@i</span> <span>@DateTime.UtcNow.Year</span></p>
         }
     }
 }

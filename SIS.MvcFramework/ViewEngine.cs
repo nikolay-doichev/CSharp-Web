@@ -7,6 +7,7 @@ using System.Text;
 
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace SIS.MvcFramework
 {
@@ -15,6 +16,14 @@ namespace SIS.MvcFramework
         public string GetHtml(string templateHtml, object model)
         {
             var methodCode = PrepareCSharpCode(templateHtml);
+            var typeName = model.GetType().FullName;
+            if (model.GetType().IsGenericType)
+            {
+                typeName = model.GetType().Name.Replace("`1", string.Empty) 
+                    + "<" 
+                    + model.GetType().GenericTypeArguments.First().Name 
+                    + ">";
+            }
             var code = @$"using System;
 using System.Text;
 using System.Linq;
@@ -26,9 +35,11 @@ namespace AppViewNamespace
     {{
         public string GetHtml(object model)
         {{
+            var Model = model as {typeName};
             var html = new StringBuilder();
 
 {methodCode}
+
             return html.ToString();
         }}
     }}
@@ -73,12 +84,12 @@ namespace AppViewNamespace
             var type = assembly.GetType("AppViewNamespace.AppViewCode");
             var instance = Activator.CreateInstance(type) as IView;
             return instance;
-
         }
 
         private string PrepareCSharpCode(string templateHtml)
         {
-            var supportedOperatiors = new[] { "if", "for", "forech", "else" };
+            var cSharpExpressionRegex = new Regex(@"[^\<\""\s]+", RegexOptions.Compiled);
+            var supportedOperatiors = new[] { "if", "for", "foreach", "else" };
             StringBuilder cSharpCode = new StringBuilder();
             StringReader reader = new StringReader(templateHtml);
             string line;
@@ -95,22 +106,24 @@ namespace AppViewNamespace
                     line = line.Remove(indexOfAt, 1);
                     cSharpCode.AppendLine(line);
                 }
-                else if (line.Contains("@"))
+                else
                 {
+                    var currentCSharpLine = new StringBuilder("html.AppendLine(@\"");
                     while (line.Contains("@"))
                     {
                         var atSignLocation = line.IndexOf("@");
-                        //before => HTML => html.AppendLine
-                        //@ => delete
-                        //C# code => " + C# code + "
-                        //line = after
+                        var before = line.Substring(0, atSignLocation);
+                        currentCSharpLine.Append(before.Replace("\"", "\"\"") + "\" + ");
+                        var cSharpAndEndOfLine = line.Substring(atSignLocation + 1);
+                        var cSharpExpression =  cSharpExpressionRegex.Match(cSharpAndEndOfLine);
+                        currentCSharpLine.Append(cSharpExpression.Value + " + @\"");
+                        var after = cSharpAndEndOfLine.Substring(cSharpExpression.Length);
+                        line = after;
                     }
-                }
-                else
-                {
-                    cSharpCode.AppendLine($"html.AppendLine(@\"{line.Replace("\"", "\"\"")}\");");
-                }
-                
+
+                    currentCSharpLine.AppendLine(line.Replace("\"", "\"\"") + "\");");
+                    cSharpCode.AppendLine(currentCSharpLine.ToString());
+                }                                
             }
             return cSharpCode.ToString();
         }
