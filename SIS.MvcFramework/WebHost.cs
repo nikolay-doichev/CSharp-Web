@@ -15,7 +15,7 @@ namespace SIS.MvcFramework
             application.Configure(routeTable);
 
             var httpServer = new HttpServer(80, routeTable);
-            await httpServer.StartAsync();
+            await httpServer.StartAsync();            
         }
     }
 }

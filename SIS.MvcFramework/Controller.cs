@@ -9,10 +9,15 @@ namespace SIS.MvcFramework
     {
         protected HttpResponse View([CallerMemberName]string viewName = null)
         {
-            var layout = File.ReadAllText("Views/Shared/_Layout.html");
+            IViewEngine viewEngine = new ViewEngine();
+                        
             var controllerName = this.GetType().Name.Replace("Controller", string.Empty);
             var html = File.ReadAllText("Views/" + controllerName + "/" + viewName + ".html");
-            var bodyWithLayout = layout = layout.Replace("@RenderBody()", html);
+            html = viewEngine.GetHtml(html, null);
+
+            var layout = File.ReadAllText("Views/Shared/_Layout.html");
+            var bodyWithLayout = layout.Replace("@RenderBody()", html);
+            bodyWithLayout = viewEngine.GetHtml(bodyWithLayout, null);
             return new HtmlResponse(bodyWithLayout);
         }
     }
