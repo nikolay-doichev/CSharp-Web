@@ -7,6 +7,7 @@ namespace SIS.MvcFramework
 {
     public abstract class Controller
     {
+        public HttpRequest Request { get; set; }
         protected HttpResponse View<T>(T viewModel = null, [CallerMemberName]string viewName = null)
             where T : class
         {
@@ -25,5 +26,6 @@ namespace SIS.MvcFramework
         {
             return this.View<object>(null, viewName);
         }
+       
     }
 }

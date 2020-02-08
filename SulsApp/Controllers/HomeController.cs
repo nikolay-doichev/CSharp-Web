@@ -1,17 +1,15 @@
 ﻿using SIS.HTTP;
-using SIS.HTTP.Response;
 using SIS.MvcFramework;
 using SulsApp.ViewModels;
+
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
 
 namespace SulsApp.Controllers
 {
     public class HomeController : Controller
-    {
-        public HttpResponse Index(HttpRequest request)
+    {        
+        [HttpGet("/")]
+        public HttpResponse Index()
         {
             var viewModel = new IndexViewModel
             {

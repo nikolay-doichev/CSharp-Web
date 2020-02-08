@@ -3,6 +3,8 @@ using SIS.HTTP.Response;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,18 +17,66 @@ namespace SIS.MvcFramework
             var routeTable = new List<Route>();
             application.ConfigureServices();
             application.Configure(routeTable);
-            AutoRegisterRoute(routeTable, application);
+            AutoRegisterStaticFilesRoute(routeTable);
+            AutoRegisterActionRoutes(routeTable, application);
 
+            Console.WriteLine("Registered routes:");
             foreach (var route in routeTable)
             {
                 Console.WriteLine(route.ToString());
             }
+            Console.WriteLine();
+            Console.WriteLine("Request:");
 
             var httpServer = new HttpServer(80, routeTable);
             await httpServer.StartAsync();            
         }
 
-        private static void AutoRegisterRoute(IList<Route> routeTable, IMvcApplication application)
+        private static void AutoRegisterActionRoutes(List<Route> routeTable, IMvcApplication application)
+        {
+            var types = application.GetType().Assembly.GetTypes()
+                .Where(type => type.IsSubclassOf(typeof(Controller)) && !type.IsAbstract);
+
+            foreach (var type in types)
+            {
+                Console.WriteLine(type.FullName);
+                var methods = type.GetMethods()
+                    .Where(x => !x.IsSpecialName && 
+                                !x.IsConstructor && 
+                                x.DeclaringType == type);
+
+                foreach (var method in methods)
+                {
+                    var url = "/" + type.Name.Replace("Controller", string.Empty) + "/" + method.Name;
+                    var attribute = method
+                        .GetCustomAttributes()
+                        .FirstOrDefault(x => x.GetType()
+                        .IsSubclassOf(typeof(HttpMethodAttribute)))
+                        as HttpMethodAttribute;
+
+                    var httpActionType = HttpMethodType.Get;
+                    if (attribute != null)
+                    {
+                        httpActionType = attribute.Type;
+                        if (attribute.Url != null)
+                        {
+                            url = attribute.Url;
+                        }
+                    }
+
+                    routeTable.Add(new Route(httpActionType, url, (request) => 
+                    {
+                        var controller = Activator.CreateInstance(type) as Controller;
+                        controller.Request = request;
+                        var respone = method.Invoke(controller, new object[] { }) as HttpResponse;
+                        return respone;
+                    }));
+                    Console.WriteLine("    " + url);
+                }
+            }
+        }
+
+        private static void AutoRegisterStaticFilesRoute(IList<Route> routeTable)
         {
             var staticFiles =  Directory.GetFiles("wwwroot","*", SearchOption.AllDirectories);
             foreach (var staticFile in staticFiles)

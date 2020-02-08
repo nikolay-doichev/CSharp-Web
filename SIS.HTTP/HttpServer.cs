@@ -16,8 +16,7 @@ namespace SIS.HTTP
         private readonly TcpListener tcpListener;
         private readonly IList<Route> routeTable;
         private readonly IDictionary<string, IDictionary<string, string>> sessions;
-
-        // TODO: Actions
+        
         public HttpServer(int port, IList<Route> routeTable)
         {
             this.tcpListener = new TcpListener(IPAddress.Loopback, port);
@@ -76,7 +75,7 @@ namespace SIS.HTTP
                 Console.WriteLine($"{request.Method} {request.Path}");
                 var route = this.routeTable.FirstOrDefault(
                     x => x.HttpMethod == request.Method &&
-                    x.Path == request.Path);
+                    string.Compare(x.Path, request.Path, true) == 0);
                 HttpResponse response;
                 if (route == null)
                 {
