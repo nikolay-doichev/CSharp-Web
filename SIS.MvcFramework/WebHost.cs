@@ -42,7 +42,8 @@ namespace SIS.MvcFramework
                 Console.WriteLine(type.FullName);
                 var methods = type.GetMethods()
                     .Where(x => !x.IsSpecialName && 
-                                !x.IsConstructor && 
+                                !x.IsConstructor &&
+                                x.IsPublic &&
                                 x.DeclaringType == type);
 
                 foreach (var method in methods)

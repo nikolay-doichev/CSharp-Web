@@ -5,6 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using SulsApp.Models;
+using System.Net.Mail;
+using System.Security.Cryptography;
 
 namespace SulsApp.Controllers
 {
@@ -29,7 +32,60 @@ namespace SulsApp.Controllers
         [HttpPost("/Users/Register")]
         public HttpResponse DoRegister()
         {
-            return this.View();
+            var username = this.Request.FormData["username"];
+            var email = this.Request.FormData["email"];
+            var password = this.Request.FormData["password"];
+            var confirmPassword = this.Request.FormData["confirmPassword"];
+
+            if (password != confirmPassword)
+            {
+                return this.Error("Passwords should be the same!");
+            }
+
+            if (username?.Length < 5 || username?.Length > 20)
+            {
+                return this.Error("Username should be between 5 and 20 characters.");
+            }
+
+            if (!IsValid(email))
+            {
+                return this.Error("Invalid email!");
+            }          
+
+            if (password?.Length < 6 || password?.Length > 20)
+            {
+                return this.Error("Password should be between 6 and 20 characters.");
+            }
+            
+            var user = new User()
+            {
+                Email = email,
+                Password = this.Hash(password),
+                Username = username
+            };
+
+            var db = new ApplicationDbContext();
+            db.Users.Add(user);
+            db.SaveChanges();
+
+            //TODO: Log in ...
+
+            return this.Redirect("/");
         }
+
+        private bool IsValid(string emailaddress)
+        {
+            try
+            {
+                new MailAddress(emailaddress);
+
+                return true;
+            }
+            catch (FormatException)
+            {
+                return false;
+            }
+        }
+
     }
 }
