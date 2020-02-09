@@ -1,18 +1,23 @@
-﻿using SIS.HTTP;
-using SIS.HTTP.Response;
-using SIS.MvcFramework;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using SulsApp.Models;
+﻿using System;
 using System.Net.Mail;
-using System.Security.Cryptography;
+
+using SIS.HTTP;
+using SulsApp.Services;
+using SIS.MvcFramework;
+using SIS.HTTP.Logging;
 
 namespace SulsApp.Controllers
 {
     public class UsersController : Controller
     {
+        private IUsersService usersService;
+        private ILogger logger;
+
+        public UsersController(IUsersService usersService, ILogger logger)
+        {
+            this.usersService = usersService;
+            this.logger = logger;
+        }
         public HttpResponse Login()
         {
             return this.View();
@@ -21,7 +26,18 @@ namespace SulsApp.Controllers
         [HttpPost("/Users/Login")]
         public HttpResponse DoLogin()
         {
-            return this.View();
+            var username =  this.Request.FormData["username"];
+            var password =  this.Request.FormData["password"];
+
+            var userId = this.usersService.GetUserId(username, password);
+            if (userId == null)
+            {
+                return this.Redirect("/Users/Login");
+            }
+
+            this.SingIn(userId);
+            this.logger.Log("User logged in: " + username);
+            return this.Redirect("/");
         }
 
         public HttpResponse Register()
@@ -55,21 +71,16 @@ namespace SulsApp.Controllers
             if (password?.Length < 6 || password?.Length > 20)
             {
                 return this.Error("Password should be between 6 and 20 characters.");
-            }
+            }     
             
-            var user = new User()
-            {
-                Email = email,
-                Password = this.Hash(password),
-                Username = username
-            };
+            this.usersService.CreateUser(username, email, password);
+            this.logger.Log("New user: " + username);
+            return this.Redirect("/Users/Login");
+        }
 
-            var db = new ApplicationDbContext();
-            db.Users.Add(user);
-            db.SaveChanges();
-
-            //TODO: Log in ...
-
+        public HttpResponse Logout()
+        {
+            this.SingOut();
             return this.Redirect("/");
         }
 

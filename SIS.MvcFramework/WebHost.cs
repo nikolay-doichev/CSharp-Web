@@ -1,12 +1,13 @@
-﻿using SIS.HTTP;
-using SIS.HTTP.Response;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+
+using SIS.HTTP;
+using SIS.HTTP.Logging;
+using SIS.HTTP.Response;
 
 namespace SIS.MvcFramework
 {
@@ -15,40 +16,45 @@ namespace SIS.MvcFramework
         public static async Task StartAsync(IMvcApplication application)
         {
             var routeTable = new List<Route>();
-            application.ConfigureServices();
+            IserviceCollection serviceCollection = new ServiceCollection();
+
+            serviceCollection.Add<ILogger, ConsoleLogger>();
+
+
+            application.ConfigureServices(serviceCollection);
             application.Configure(routeTable);
             AutoRegisterStaticFilesRoute(routeTable);
-            AutoRegisterActionRoutes(routeTable, application);
+            AutoRegisterActionRoutes(routeTable, application, serviceCollection);
 
-            Console.WriteLine("Registered routes:");
+            var logger = serviceCollection.CreateInstance<ILogger>();
+            logger.Log("Registered routes:");
             foreach (var route in routeTable)
             {
-                Console.WriteLine(route.ToString());
+                logger.Log(route.ToString());
             }
-            Console.WriteLine();
-            Console.WriteLine("Request:");
+            logger.Log(string.Empty);
+            logger.Log("Request:");
 
-            var httpServer = new HttpServer(80, routeTable);
-            await httpServer.StartAsync();            
+            var httpServer = new HttpServer(80, routeTable, logger);
+            await httpServer.StartAsync();
         }
 
-        private static void AutoRegisterActionRoutes(List<Route> routeTable, IMvcApplication application)
+        private static void AutoRegisterActionRoutes(List<Route> routeTable, IMvcApplication application, IserviceCollection serviceCollection)
         {
-            var types = application.GetType().Assembly.GetTypes()
+            var controllers = application.GetType().Assembly.GetTypes()
                 .Where(type => type.IsSubclassOf(typeof(Controller)) && !type.IsAbstract);
 
-            foreach (var type in types)
+            foreach (var controller in controllers)
             {
-                Console.WriteLine(type.FullName);
-                var methods = type.GetMethods()
-                    .Where(x => !x.IsSpecialName && 
+                var action = controller.GetMethods()
+                    .Where(x => !x.IsSpecialName &&
                                 !x.IsConstructor &&
                                 x.IsPublic &&
-                                x.DeclaringType == type);
+                                x.DeclaringType == controller);
 
-                foreach (var method in methods)
+                foreach (var method in action)
                 {
-                    var url = "/" + type.Name.Replace("Controller", string.Empty) + "/" + method.Name;
+                    var url = "/" + controller.Name.Replace("Controller", string.Empty) + "/" + method.Name;
                     var attribute = method
                         .GetCustomAttributes()
                         .FirstOrDefault(x => x.GetType()
@@ -65,21 +71,23 @@ namespace SIS.MvcFramework
                         }
                     }
 
-                    routeTable.Add(new Route(httpActionType, url, (request) => 
-                    {
-                        var controller = Activator.CreateInstance(type) as Controller;
-                        controller.Request = request;
-                        var respone = method.Invoke(controller, new object[] { }) as HttpResponse;
-                        return respone;
-                    }));
-                    Console.WriteLine("    " + url);
+                    routeTable.Add(new Route(httpActionType, url, (request) => InvokeAction(request, serviceCollection,controller, method)
+                    ));                    
                 }
             }
         }
 
+        private static HttpResponse InvokeAction(HttpRequest request, IserviceCollection serviceCollection, Type controllerType, MethodInfo actionMethod)
+        {
+            var controller = serviceCollection.CreateInstance(controllerType) as Controller;
+            controller.Request = request;
+            var respone = actionMethod.Invoke(controller, new object[] { }) as HttpResponse;
+            return respone;
+        }
+
         private static void AutoRegisterStaticFilesRoute(IList<Route> routeTable)
         {
-            var staticFiles =  Directory.GetFiles("wwwroot","*", SearchOption.AllDirectories);
+            var staticFiles = Directory.GetFiles("wwwroot", "*", SearchOption.AllDirectories);
             foreach (var staticFile in staticFiles)
             {
                 var path = staticFile.Replace("wwwroot", string.Empty).Replace("\\", "/");
@@ -102,7 +110,7 @@ namespace SIS.MvcFramework
                     return new FileResponse(File.ReadAllBytes(staticFile), contentType);
                 }));
             }
-            
+
         }
     }
 }
