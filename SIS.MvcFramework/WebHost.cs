@@ -81,7 +81,27 @@ namespace SIS.MvcFramework
         {
             var controller = serviceCollection.CreateInstance(controllerType) as Controller;
             controller.Request = request;
-            var respone = actionMethod.Invoke(controller, new object[] { }) as HttpResponse;
+
+            var actionParameterValues = new List<object>();
+            var actionParameters = actionMethod.GetParameters();
+            foreach (var parameter in actionParameters)
+            {
+                var parameterName = parameter.Name.ToLower();
+                object value = null;
+                if (request.QueryData.Any(x => x.Key.ToLower() == parameterName))
+                {
+                    value = request.QueryData.FirstOrDefault(x => x.Key.ToLower() == parameterName).Value;
+                }
+                else if (request.FormData.Any(x => x.Key.ToLower() == parameterName))
+                {
+                    value = request.FormData.FirstOrDefault(x => x.Key.ToLower() == parameterName).Value;
+                }
+                
+                actionParameterValues.Add(value);
+            }
+            var respone = actionMethod.Invoke(controller, actionParameterValues.ToArray()) as HttpResponse;
+
+
             return respone;
         }
 
