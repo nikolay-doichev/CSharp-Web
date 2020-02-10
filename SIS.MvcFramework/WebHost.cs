@@ -71,8 +71,8 @@ namespace SIS.MvcFramework
                         }
                     }
 
-                    routeTable.Add(new Route(httpActionType, url, (request) => InvokeAction(request, serviceCollection,controller, method)
-                    ));                    
+                    routeTable.Add(new Route(httpActionType, url, (request) => InvokeAction(request, serviceCollection, controller, method)
+                    ));
                 }
             }
         }
@@ -86,23 +86,42 @@ namespace SIS.MvcFramework
             var actionParameters = actionMethod.GetParameters();
             foreach (var parameter in actionParameters)
             {
-                var parameterName = parameter.Name.ToLower();
-                object value = null;
-                if (request.QueryData.Any(x => x.Key.ToLower() == parameterName))
+                var value = Convert.ChangeType(
+                    GetValueFromRequest(request, parameter.Name), 
+                    parameter.ParameterType);
+
+                if (value == null)
                 {
-                    value = request.QueryData.FirstOrDefault(x => x.Key.ToLower() == parameterName).Value;
+                    var parameterValue = Activator.CreateInstance(parameter.ParameterType);
+                    foreach (var property in parameter.ParameterType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                    {
+                        var propertyValue = GetValueFromRequest(request, property.Name);
+                        property.SetValue(parameterValue, Convert.ChangeType(propertyValue, property.PropertyType));
+                    }
+                    actionParameterValues.Add(parameterValue);
                 }
-                else if (request.FormData.Any(x => x.Key.ToLower() == parameterName))
-                {
-                    value = request.FormData.FirstOrDefault(x => x.Key.ToLower() == parameterName).Value;
-                }
-                
-                actionParameterValues.Add(value);
+
             }
+
             var respone = actionMethod.Invoke(controller, actionParameterValues.ToArray()) as HttpResponse;
 
-
             return respone;
+        }
+
+        private static object GetValueFromRequest(HttpRequest request, string parameterName)
+        {
+            object value = null;
+            parameterName = parameterName.ToLower();
+            if (request.QueryData.Any(x => x.Key.ToLower() == parameterName))
+            {
+                value = request.QueryData.FirstOrDefault(x => x.Key.ToLower() == parameterName).Value;
+            }
+            else if (request.FormData.Any(x => x.Key.ToLower() == parameterName))
+            {
+                value = request.FormData.FirstOrDefault(x => x.Key.ToLower() == parameterName).Value;
+            }
+
+            return value;
         }
 
         private static void AutoRegisterStaticFilesRoute(IList<Route> routeTable)

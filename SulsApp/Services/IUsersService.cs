@@ -11,7 +11,8 @@ namespace SulsApp.Services
         string GetUserId(string username, string password);
 
         void ChangePassword(string username, string newPassword);
-
+        bool IsUserNameUsed(string usename);
+        bool IsEmailUsed(string email);
         int CountUsers();
     }
 }

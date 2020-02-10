@@ -5,6 +5,7 @@ using SIS.HTTP;
 using SulsApp.Services;
 using SIS.MvcFramework;
 using SIS.HTTP.Logging;
+using SulsApp.ViewModels.Users;
 
 namespace SulsApp.Controllers
 {
@@ -23,8 +24,8 @@ namespace SulsApp.Controllers
             return this.View();
         }
 
-        [HttpPost("/Users/Login")]
-        public HttpResponse DoLogin(string username, string password)
+        [HttpPost]
+        public HttpResponse Login(string username, string password)
         {
             var userId = this.usersService.GetUserId(username, password);
             if (userId == null)
@@ -42,41 +43,51 @@ namespace SulsApp.Controllers
             return this.View();
         }
 
-        [HttpPost("/Users/Register")]
-        public HttpResponse DoRegister()
+        [HttpPost]
+        public HttpResponse Register(RegisterInputModel input)
         {
-            var username = this.Request.FormData["username"];
-            var email = this.Request.FormData["email"];
-            var password = this.Request.FormData["password"];
-            var confirmPassword = this.Request.FormData["confirmPassword"];
-
-            if (password != confirmPassword)
+            if (input.Password != input.ConfirmPassword)
             {
                 return this.Error("Passwords should be the same!");
             }
 
-            if (username?.Length < 5 || username?.Length > 20)
+            if (input.Username?.Length < 5 || input.Username?.Length > 20)
             {
                 return this.Error("Username should be between 5 and 20 characters.");
             }
 
-            if (!IsValid(email))
+            if (!IsValid(input.Email))
             {
                 return this.Error("Invalid email!");
             }          
 
-            if (password?.Length < 6 || password?.Length > 20)
+            if (input.Password?.Length < 6 || input.Password?.Length > 20)
             {
                 return this.Error("Password should be between 6 and 20 characters.");
-            }     
-            
-            this.usersService.CreateUser(username, email, password);
-            this.logger.Log("New user: " + username);
+            }
+
+            if (this.usersService.IsUserNameUsed(input.Username))
+            {
+                return this.Error("Username already exist!");
+            }
+
+            if (this.usersService.IsEmailUsed(input.Email))
+            {
+                return this.Error("Email already exist!");
+            }
+
+            this.usersService.CreateUser(input.Username, input.Email, input.Password);
+            this.logger.Log("New user: " + input.Username);
             return this.Redirect("/Users/Login");
         }
 
         public HttpResponse Logout()
         {
+            if (this.IsUserLoggedIn())
+            {
+                return this.Redirect("/Users/Login");
+            }
+
             this.SingOut();
             return this.Redirect("/");
         }

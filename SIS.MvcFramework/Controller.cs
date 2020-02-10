@@ -45,6 +45,11 @@ namespace SIS.MvcFramework
             return new HtmlResponse(bodyWithLayout);
         }
 
+        protected bool IsUserLoggedIn()
+        {
+            return this.User != null;
+        }
+
         protected void SingIn(string userId)
         {
             this.Request.SessionData["UserId"] = userId;

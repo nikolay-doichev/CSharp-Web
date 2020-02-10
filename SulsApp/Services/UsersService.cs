@@ -55,7 +55,14 @@ namespace SulsApp.Services
                 .Select(x => x.Id)
                 .FirstOrDefault();
         }
-
+        public bool IsUserNameUsed(string usename)
+        {
+            return this.db.Users.Any(x => x.Username == usename);
+        }
+        public bool IsEmailUsed(string email)
+        {
+            return this.db.Users.Any(x => x.Email == email);
+        }
         private string Hash(string input)
         {
             var crypt = new SHA256Managed();
