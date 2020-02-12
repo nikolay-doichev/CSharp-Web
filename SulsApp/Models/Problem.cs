@@ -17,5 +17,6 @@ namespace SulsApp.Models
         [MaxLength(20)]
         public string Name { get; set; }        
         public int Points { get; set; }
+        public virtual ICollection<Submission> Submissions { get; set; }
     }
 }

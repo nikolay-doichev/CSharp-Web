@@ -17,7 +17,7 @@ namespace SulsApp.Controllers
         }
         public HttpResponse Create()
         {
-            if (this.IsUserLoggedIn())
+            if (!this.IsUserLoggedIn())
             {
                 return this.Redirect("/Users/Login");
             }
@@ -27,7 +27,7 @@ namespace SulsApp.Controllers
         [HttpPost]
         public HttpResponse Create(string name, int points)
         {
-            if (this.IsUserLoggedIn())
+            if (!this.IsUserLoggedIn())
             {
                 return this.Redirect("/Users/Login");
             }

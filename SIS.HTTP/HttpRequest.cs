@@ -90,13 +90,14 @@ namespace SIS.HTTP
                 this.FormData = new Dictionary<string, string>();
                 ParseData(this.FormData, this.Body);
                 this.Query = string.Empty;
-                this.QueryData = new Dictionary<string, string>();
+              
                 if (this.Path.Contains("?"))
                 {
                     var parts = this.Path.Split(new char[] { '?' }, 2);
                     this.Path = parts[0];
                     this.Query = parts[1];
                 }
+                this.QueryData = new Dictionary<string, string>();
                 ParseData(this.QueryData, this.Query);
             }
         }

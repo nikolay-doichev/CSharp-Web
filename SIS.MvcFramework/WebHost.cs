@@ -90,7 +90,7 @@ namespace SIS.MvcFramework
                     GetValueFromRequest(request, parameter.Name), 
                     parameter.ParameterType);
 
-                if (value == null)
+                if (value == null && parameter.ParameterType != typeof(String))
                 {
                     var parameterValue = Activator.CreateInstance(parameter.ParameterType);
                     foreach (var property in parameter.ParameterType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
@@ -99,6 +99,11 @@ namespace SIS.MvcFramework
                         property.SetValue(parameterValue, Convert.ChangeType(propertyValue, property.PropertyType));
                     }
                     actionParameterValues.Add(parameterValue);
+                }
+
+                else
+                {
+                    actionParameterValues.Add(value);
                 }
 
             }
