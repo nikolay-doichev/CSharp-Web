@@ -58,18 +58,20 @@ namespace SulsApp.Controllers
             var viewModel = this.db.
                 Problems.
                 Where(x => x.Id == id).
-                Select(x => new DetailsViewModel 
-            {
-                Name = x.Name,
-                Problems = x.Submissions.Select(s => new ProblemDetailsSubmissionViewModel 
+                Select(
+                x => new DetailsViewModel
                 {
-                    CreatedOn = s.CreatedOn,
-                    AchievedResult = s.AchievedResult,
-                    SubmissionId = s.Id,
-                    MaxPoints = x.Points,
-                    Username = s.Users.Username,
-                })
-            });
+                    Name = x.Name,
+                    Problems = x.Submissions.Select(s =>
+                    new ProblemDetailsSubmissionViewModel
+                    {
+                        CreatedOn = s.CreatedOn,
+                        AchievedResult = s.AchievedResult,
+                        SubmissionId = s.Id,
+                        MaxPoints = x.Points,
+                        Username = s.Users.Username,
+                    })
+                }).FirstOrDefault();
 
             return this.View(viewModel);
         }
