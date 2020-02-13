@@ -35,7 +35,7 @@ namespace SulsApp.Services
 
         public void CreateUser(string username, string email, string password)
         {
-            var user = new User()
+            var user = new User
             {
                 Email = email,
                 Password = this.Hash(password),
@@ -65,6 +65,11 @@ namespace SulsApp.Services
         }
         private string Hash(string input)
         {
+            if (input == null)
+            {
+                return null;
+            }
+
             var crypt = new SHA256Managed();
             StringBuilder hash = new StringBuilder();
             byte[] crypto = crypt.ComputeHash(Encoding.UTF8.GetBytes(input));

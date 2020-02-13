@@ -22,39 +22,39 @@ namespace SIS.HTTP
 
         public override string ToString()
         {
-            StringBuilder coockieBuilder = new StringBuilder();
-            coockieBuilder.Append($"{this.Name}={this.Value}");
+            StringBuilder cookieBuilder = new StringBuilder();
+            cookieBuilder.Append($"{this.Name}={this.Value}");
             if (this.MaxAge.HasValue)
             {
-                coockieBuilder.Append($"; Max-Age" + this.MaxAge.Value.ToString());
+                cookieBuilder.Append($"; Max-Age=" + this.MaxAge.Value.ToString());
             }
             else if (this.Expires.HasValue)
             {
-                coockieBuilder.Append($"; Expires=" + this.Expires.Value.ToString("R"));
+                cookieBuilder.Append($"; Expires=" + this.Expires.Value.ToString("R"));
             }
             if (!string.IsNullOrWhiteSpace(this.Domain))
             {
-                coockieBuilder.Append($"; Domain=" + this.Domain);
+                cookieBuilder.Append($"; Domain=" + this.Domain);
             }
 
             if (!string.IsNullOrWhiteSpace(this.Path))
             {
-                coockieBuilder.Append($"; Path=" + this.Path);
+                cookieBuilder.Append($"; Path=" + this.Path);
             }
 
             if (this.Secure)
             {
-                coockieBuilder.Append("; Secure");
+                cookieBuilder.Append("; Secure");
             }
 
             if (this.HttpOnly)
             {
-                coockieBuilder.Append("; HttpOnly");
+                cookieBuilder.Append("; HttpOnly");
             }
 
-            coockieBuilder.Append("; SameSite" + this.SameSite.ToString());
+            cookieBuilder.Append("; SameSite=" + this.SameSite.ToString());
 
-            return coockieBuilder.ToString();
+            return cookieBuilder.ToString();
         }
     }
 }

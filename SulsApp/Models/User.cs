@@ -14,6 +14,6 @@ namespace SulsApp.Models
         }
        
 
-        public ICollection<Submission> Submissions { get; set; }
+        public virtual ICollection<Submission> Submissions { get; set; }
     }
 }

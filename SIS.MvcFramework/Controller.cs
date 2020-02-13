@@ -14,7 +14,8 @@ namespace SIS.MvcFramework
         protected HttpResponse View<T>(T viewModel = null, [CallerMemberName]string viewName = null)
             where T : class
         {
-            var controllerName = this.GetType().Name.Replace("Controller", string.Empty);
+            var typeName = this.GetType().Name/*.Replace("Controller", string.Empty)*/;
+            var controllerName = typeName.Substring(0, typeName.Length - 10);
             var viewPath = "Views/" + controllerName + "/" + viewName + ".html";
             return this.ViewByName<T>(viewPath, viewModel);
         }

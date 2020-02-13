@@ -10,9 +10,14 @@ namespace SIS.HTTP
     {
         public HttpRequest(string httpRequestAsString)
         {
+            if (string.IsNullOrWhiteSpace(httpRequestAsString))
+            {
+
+                return;
+            }
+
             this.Headers = new List<Header>();
             this.Cookies = new List<Cookie>();
-            this.SessionData = new Dictionary<string, string>();
 
             var lines = httpRequestAsString.Split(new string[] { HttpConstants.NewLine }, StringSplitOptions.None);
 
@@ -26,8 +31,8 @@ namespace SIS.HTTP
             var httpMethod = infoHeaderParts[0];
             this.Method = httpMethod switch
             {
-                "POST" => HttpMethodType.Post,
                 "GET" => HttpMethodType.Get,
+                "POST" => HttpMethodType.Post,
                 "PUT" => HttpMethodType.Put,
                 "DELETE" => HttpMethodType.Delete,
                 _ => HttpMethodType.Unknown
@@ -48,7 +53,7 @@ namespace SIS.HTTP
             for (int i = 1; i < lines.Length; i++)
             {
                 var line = lines[i];
-                if (String.IsNullOrWhiteSpace(line))
+                if (string.IsNullOrWhiteSpace(line))
                 {
                     isInHeader = false;
                     continue;
@@ -75,7 +80,7 @@ namespace SIS.HTTP
                             var cookieParts = cookieAsString.Split(new char[] { '=' }, 2);
                             if (cookieParts.Length == 2)
                             {
-                                this.Cookies.Add(new Cookie(cookieParts[0], 
+                                this.Cookies.Add(new Cookie(cookieParts[0],
                                                             cookieParts[1]));
                             }
                         }
@@ -85,21 +90,21 @@ namespace SIS.HTTP
                 {
                     bodyBuilder.AppendLine(line);
                 }
-
-                this.Body = bodyBuilder.ToString().TrimEnd('\r', '\n');
-                this.FormData = new Dictionary<string, string>();
-                ParseData(this.FormData, this.Body);
-                this.Query = string.Empty;
-              
-                if (this.Path.Contains("?"))
-                {
-                    var parts = this.Path.Split(new char[] { '?' }, 2);
-                    this.Path = parts[0];
-                    this.Query = parts[1];
-                }
-                this.QueryData = new Dictionary<string, string>();
-                ParseData(this.QueryData, this.Query);
             }
+            this.Body = bodyBuilder.ToString().TrimEnd('\r', '\n');
+            this.FormData = new Dictionary<string, string>();
+            ParseData(this.FormData, this.Body);
+            this.Query = string.Empty;
+
+            if (this.Path.Contains("?"))
+            {
+                var parts = this.Path.Split(new char[] { '?' }, 2);
+                this.Path = parts[0];
+                this.Query = parts[1];
+            }
+            this.QueryData = new Dictionary<string, string>();
+            ParseData(this.QueryData, this.Query);
+
         }
 
         private void ParseData(IDictionary<string, string> output, string input)
@@ -125,6 +130,6 @@ namespace SIS.HTTP
         public string Body { get; set; }
         public IDictionary<string, string> FormData { get; set; }
         public IDictionary<string, string> QueryData { get; set; }
-        public IDictionary<string,string> SessionData { get; set; }
+        public IDictionary<string, string> SessionData { get; set; }
     }
 }
