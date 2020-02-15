@@ -16,6 +16,7 @@ namespace IRunes.Controllers
         {
             this.usersService = usersService;
         }
+
         [HttpGet("/")]
         public HttpResponse Index()
         {

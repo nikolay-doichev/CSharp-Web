@@ -6,8 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="ViewModels\Albums\" />
-    <Folder Include="ViewModels\Tracks\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

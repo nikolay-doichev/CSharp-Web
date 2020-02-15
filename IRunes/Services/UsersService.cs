@@ -41,7 +41,7 @@ namespace IRunes.Services
         {
             var username = this.db.Users
                 .Where(x => x.Id == id)
-                .Select(x => x.Id)
+                .Select(x => x.Username)
                 .FirstOrDefault();
 
             return username;
