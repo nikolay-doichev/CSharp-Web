@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SIS.MvcFramework.Tests", "S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRunes", "IRunes\IRunes.csproj", "{D88AAF07-6535-49B0-A8FA-83471E1ADFD0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Andreys", "Andreys\Andreys.csproj", "{359B31C2-08E4-47F0-8E0D-D82BCC576880}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Andreys", "Andreys\Andreys.csproj", "{359B31C2-08E4-47F0-8E0D-D82BCC576880}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedTrip", "SharedTrip\SharedTrip.csproj", "{9A88B57C-D42C-46B9-B2A5-4FAB631E1F3E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{359B31C2-08E4-47F0-8E0D-D82BCC576880}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{359B31C2-08E4-47F0-8E0D-D82BCC576880}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{359B31C2-08E4-47F0-8E0D-D82BCC576880}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A88B57C-D42C-46B9-B2A5-4FAB631E1F3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A88B57C-D42C-46B9-B2A5-4FAB631E1F3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A88B57C-D42C-46B9-B2A5-4FAB631E1F3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A88B57C-D42C-46B9-B2A5-4FAB631E1F3E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
